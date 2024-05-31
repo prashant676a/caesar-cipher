@@ -1,37 +1,48 @@
+# require "set"
+
 class Board
-    attr_accessor :board
+    attr_accessor :cells, :size
 
-    def initialize
-        @board = Array.new(9)
+    def initialize(board_size)
+        @size = board_size
+        @cells = Array.new(board_size*board_size)
     end
 
-    def display_board
-        puts " #{board[0]} | #{board[1]} | #{board[2]} "
-        puts "-----------"
-        puts " #{board[3]} | #{board[4]} | #{board[5]} "
-        puts "-----------"
-        puts " #{board[6]} | #{board[7]} | #{board[8]} "
-    end
-
-    def is_winner?(player)
-        win_condition = [
-            [0,1,2],
-            [3,4,5],
-            [6,7,8],
-            [0,3,6],
-            [1,4,7],
-            [2,5,8],
-            [0,4,8],
-            [2,4,6]
-        ]
-
-        win_condition.any? do |condition|
-            @board[condition[0]] == player.symbol && @board[condition[1]] == player.symbol && @board[condition[2]] == player.symbol
+    def display
+        (0...@size).each do |row|
+            row_start = row * @size
+            row_end = row_start + @size -1 
+            puts @cells[row_start..row_end].join("  |  ")
+            puts "-"*20 if row!=@size-1
         end
     end
 
-    def is_full?(board)
-        !(board.board.any?{|cell| cell.nil?})
+    def is_winner?(player)
+
+        #check rows
+        (0...@size).each do |row|
+            return true if
+            (row*@size...(row+1)*@size).all?{|i| @cells[i] == player.symbol}
+        end
+
+        #check columns
+        (0...@size).each do |col|
+            return true if
+            (0...@size).all?{|row| @cells[@size*row+col] == player.symbol}                                                                      #each row
+        end
+
+        # Check main diagonal
+        return true if (0...size).all? { |i| cells[i * (size + 1)] == player.symbol }
+
+        # Check secondary diagonal
+        return true if (0...size).all? { |i| cells[i * (size - 1) + (size - 1)] == player.symbol }
+
+        false
+
+    end
+
+    def is_full?
+        !(@cells.any?{|cell| cell.nil?})
     end
 end
 
@@ -47,8 +58,8 @@ class Player
 
     def make_move(board, position)
         #implemen move logic
-        if board.board[position].nil? 
-            board.board[position] = @symbol
+        if board.cells[position].nil? 
+            board.cells[position] = @symbol
             puts "player #{@symbol} has made move."
         else
             puts "invalid move, place occupied"
@@ -60,23 +71,23 @@ end
 class Game
     attr_accessor :board, :current_player
 
-    def initialize
-        @board = Board.new
+    def initialize(board_size)
+        @board = Board.new(board_size)
         @current_player = Player.new("X")
     end
 
     def get_input
-        puts "Enter board position(1,1)to(3,3) separated by a comma(no space): "
+        puts "Enter board position(1,1)to(#{board.size},#{board.size}) separated by a comma(no space): "
         input = gets.strip
         numbers = input.split(',').map(&:to_i)
 
-        array_index = (numbers[0]-1)*3+(numbers[1]-1)
+        array_index = (numbers[0]-1)*board.size+(numbers[1]-1)
         return array_index
     end
 
     def play_game
         while true
-            board.display_board
+            board.display
             #input from current player and update it 
             
             puts "#{current_player}'s turn."
@@ -86,11 +97,11 @@ class Game
 
             #check winner
             if board.is_winner?(current_player)
-                board.display_board
+                board.display
                 puts "Player #{current_player.symbol} wins!"
                 break
-            elsif board.is_full?(@board)
-                board.display_board
+            elsif board.is_full?
+                board.display
                 puts "It's a tie."
                 break
             end
@@ -103,5 +114,14 @@ class Game
 end
 
 
-g = Game.new
+#getting the board size for game
+def get_board_size
+    puts "Enter the board size(3 to 9) which will of squre of given number"
+    puts "e.g 3 for 3*3 and 9 for 9*9"
+    board_size = gets.strip.to_i
+end
+
+board_size = get_board_size()
+
+g = Game.new(board_size)
 g.play_game
