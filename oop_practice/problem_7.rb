@@ -20,3 +20,4 @@ end
 joe = Student.new("Joe", 90)
 bob = Student.new("Bob", 84)
 puts "Well done!" if joe.better_grade_than?(bob)
+
