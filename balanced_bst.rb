@@ -58,6 +58,48 @@ class Tree
     end
   end
 
+  def balanced?
+    balanced_helper(@root)
+  end
+
+  def depth(node = @root)
+    return 0 if node.nil?
+    1 + [depth(node.left), depth(node.right)].max
+  end
+
+  def inorder(node = @root, result = [])
+    return result if node.nil?
+    inorder(node.left, result)
+    result << node.value
+    inorder(node.right, result)
+    result
+  end
+
+  def preorder(node = @root, result = [])
+    return result if node.nil?
+    result << node.value
+    preorder(node.left, result)
+    preorder(node.right, result)
+    result
+  end
+
+  def postorder(node = @root, result = [])
+    return result if node.nil?
+    postorder(node.left, result)
+    postorder(node.right, result)
+    result << node.value
+    result
+  end
+
+  def find(value, node = @root)
+    return node if node.nil? || node.value == value
+    if value < node.value
+      find(value, node.left)
+    else
+      find(value, node.right)
+    end
+  end
+
   def insert(value)
     curr_node = @root
     previous_node = @root
@@ -84,7 +126,33 @@ class Tree
     @root = delete_node(@root, value)
   end
 
+  def rebalance(node=@root)
+    if balance_factor(node) > 1
+      if balance_factor(node.left) >= 0
+        node = right_rotate(node)
+      else
+        node.left = left_rotate(node.left)
+        node = right_rotate(node)
+      end
+    elsif balance_factor(node) < -1
+      if balance_factor(node.right) <= 0
+        node = left_rotate(node)
+      else
+        node.right = right_rotate(node.right)
+        node = left_rotate(node)
+      end
+    end
+    return node
+  end
+
   private
+  def balanced_helper(node)
+    return true if node.nil?
+    left_height = height(node.left)
+    right_height = height(node.right)
+    return false if (left_height - right_height).abs > 1
+    balanced_helper(node.left) && balanced_helper(node.right)
+  end
 
   def delete_node(node, value)
     return node if node.nil?
@@ -130,24 +198,6 @@ class Tree
     1 + [height(node.left), height(node.right)].max
   end
 
-  def rebalance(node)
-    if balance_factor(node) > 1
-      if balance_factor(node.left) >= 0
-        node = right_rotate(node)
-      else
-        node.left = left_rotate(node.left)
-        node = right_rotate(node)
-      end
-    elsif balance_factor(node) < -1
-      if balance_factor(node.right) <= 0
-        node = left_rotate(node)
-      else
-        node.right = right_rotate(node.right)
-        node = left_rotate(node)
-      end
-    end
-    return node
-  end
 
   def left_rotate(node)
     new_root = node.right
@@ -167,16 +217,51 @@ class Tree
 end
 
 
-array = [1, 7, 4, 23, 8, 9, 4, 3, 6, 7, 9, 67, 6345, 324]
-list = Tree.new(array)
+# array = [1, 7, 4, 23, 8, 9, 4, 3, 6, 7, 9, 67, 6345, 324]
+# list = Tree.new(array)
 
-p list.pretty_print
-list.insert(555)
-list.insert(556)
+# p list.pretty_print
+# list.insert(555)
+# list.insert(556)
 
 
-list.pretty_print
-list.delete(555)
-list.pretty_print
+# list.pretty_print
+# list.delete(555)
+# list.pretty_print
 
-list.print_level_order
+# list.print_level_order
+
+
+# Create a binary search tree from an array of random numbers
+random_array = Array.new(15) { rand(1..100) }
+puts "Random array: #{random_array}"
+tree = Tree.new(random_array)
+
+# Confirm that the tree is balanced
+puts "Tree is balanced? #{tree.balanced?}"
+
+# Print out all elements in level, pre, post, and in-order
+puts "Inorder: #{tree.inorder}"
+puts "Preorder: #{tree.preorder}"
+puts "Postorder: #{tree.postorder}"
+
+# Unbalance the tree by adding several numbers > 100
+tree.insert(101)
+tree.insert(102)
+tree.insert(103)
+tree.insert(104)
+tree.insert(105)
+
+# Confirm that the tree is unbalanced
+puts "Tree is balanced? #{tree.balanced?}"
+
+# Balance the tree by calling #rebalance
+tree.rebalance
+
+# Confirm that the tree is balanced
+puts "Tree is balanced? #{tree.balanced?}"
+
+# Print out all elements in level, pre, post, and in-order
+puts "Inorder: #{tree.inorder}"
+puts "Preorder: #{tree.preorder}"
+puts "Postorder: #{tree.postorder}"
