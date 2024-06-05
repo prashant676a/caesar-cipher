@@ -1,15 +1,3 @@
-# def Fibonacci(num)
-#   if num==0
-#     0
-#   elsif num==1
-#     1
-#   else
-#     return Fibonacci(num-1) + Fibonacci(num-2)
-#   end
-# end
-
-# Fibonacci(3)
-
 def fibs(number)
   if number==1
     return [0]
@@ -37,5 +25,4 @@ end
 
 nums = []
 (0...8).each {|i| nums.append(fibs_rec(i))}
-
 p nums

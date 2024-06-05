@@ -29,7 +29,7 @@ class BinarySearchTree
       end
 
     end
-    @size+1
+    @size+=1
   end
 
 
@@ -59,7 +59,6 @@ class BinarySearchTree
           queue.push(child)
         end
       end
-
     end
 
   end
