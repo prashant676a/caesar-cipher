@@ -80,6 +80,88 @@ class Tree
     @size+=1
   end
 
+  def delete(value)
+    @root = delete_node(@root, value)
+  end
+
+  private
+
+  def delete_node(node, value)
+    return node if node.nil?
+
+    if value < node.value
+      node.left = delete_node(node.left, value)
+    elsif value > node.value
+      node.right = delete_node(node.right, value)
+    else
+      # Node with one or no child
+      if node.left.nil?
+        return node.right
+      elsif node.right.nil?
+        return node.left
+      end
+
+      # Node with two children
+      node.value = min_value(node.right)
+      node.right = delete_node(node.right, node.value)
+    end
+
+    # Rebalance the tree
+    node = rebalance(node)
+
+    return node
+  end
+
+  def min_value(node)
+    min = node.value
+    while node.left != nil
+      min = node.left.value
+      node = node.left
+    end
+    return min
+  end
+
+  def balance_factor(node)
+    (height(node.left) - height(node.right))
+  end
+
+  def height(node)
+    return 0 if node.nil?
+    1 + [height(node.left), height(node.right)].max
+  end
+
+  def rebalance(node)
+    if balance_factor(node) > 1
+      if balance_factor(node.left) >= 0
+        node = right_rotate(node)
+      else
+        node.left = left_rotate(node.left)
+        node = right_rotate(node)
+      end
+    elsif balance_factor(node) < -1
+      if balance_factor(node.right) <= 0
+        node = left_rotate(node)
+      else
+        node.right = right_rotate(node.right)
+        node = left_rotate(node)
+      end
+    end
+    return node
+  end
+
+  def left_rotate(node)
+    new_root = node.right
+    node.right = new_root.left
+    new_root.left = node
+    return new_root
+  end
+
+  def right_rotate(node)
+    new_root = node.left
+    node.left = new_root.right
+    new_root.right = node
+    return new_root
+  end
 
 
 end
@@ -88,5 +170,13 @@ end
 array = [1, 7, 4, 23, 8, 9, 4, 3, 6, 7, 9, 67, 6345, 324]
 list = Tree.new(array)
 
-# p list.pretty_print
-p list.print_level_order
+p list.pretty_print
+list.insert(555)
+list.insert(556)
+
+
+list.pretty_print
+list.delete(555)
+list.pretty_print
+
+list.print_level_order
